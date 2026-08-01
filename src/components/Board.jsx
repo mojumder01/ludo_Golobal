@@ -88,27 +88,29 @@ export default function Board({ gameState, onTokenClick, onRoll, rollAnim }) {
         return (
           <div
             key={color}
-            className={`base base--${color}`}
+            className={`base base--${color}${player ? '' : ' base--inactive'}`}
             style={{ gridRow: `${row + 1} / span 6`, gridColumn: `${col + 1} / span 6` }}
           >
             {player && (
-              <div className={`base__dice${isCurrent ? ' base__dice--current' : ''}`}>
-                <Dice
-                  value={diceValue}
-                  rollId={gameState.rollId}
-                  size="sm"
-                  accentColor={COLOR_HEX[color]}
-                  canRoll={canRollHere}
-                  spinning={animatingHere}
-                  onRoll={onRoll}
-                />
-              </div>
+              <>
+                <div className={`base__dice${isCurrent ? ' base__dice--current' : ''}`}>
+                  <Dice
+                    value={diceValue}
+                    rollId={gameState.rollId}
+                    size="sm"
+                    accentColor={COLOR_HEX[color]}
+                    canRoll={canRollHere}
+                    spinning={animatingHere}
+                    onRoll={onRoll}
+                  />
+                </div>
+                <div className="base__panel">
+                  {[0, 1, 2, 3].map((tokenIndex) => (
+                    <div key={tokenIndex} className="base__slot" />
+                  ))}
+                </div>
+              </>
             )}
-            <div className="base__panel">
-              {[0, 1, 2, 3].map((tokenIndex) => (
-                <div key={tokenIndex} className="base__slot" />
-              ))}
-            </div>
           </div>
         );
       })}
