@@ -6,6 +6,10 @@ import {
 } from './constants.js';
 
 const TOKENS_PER_PLAYER = 4;
+// Rolling any of these lets a token leave its base yard (classic Ludo
+// only allows 6; this relaxed variant also allows 1 and 2 so games open
+// up faster).
+const EXIT_ROLLS = new Set([1, 2, 6]);
 
 export function createInitialState(colors, mode = {}) {
   return {
@@ -33,7 +37,7 @@ function computeMovableTokens(player, dice, allPlayers) {
   player.tokens.forEach((progress, tokenIndex) => {
     if (progress === STEPS_TO_FINISH) return; // already home
     if (progress === -1) {
-      if (dice === 6) movable.push(tokenIndex);
+      if (EXIT_ROLLS.has(dice)) movable.push(tokenIndex);
       return;
     }
     const newProgress = progress + dice;
