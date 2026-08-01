@@ -210,6 +210,7 @@ button {
 /* ---------- Board ---------- */
 
 .board {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(15, 1fr);
   grid-template-rows: repeat(15, 1fr);
@@ -220,10 +221,14 @@ button {
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 22px;
-  box-shadow: var(--shadow), 0 0 70px -15px rgba(255, 200, 120, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow:
+    var(--shadow),
+    0 0 80px -12px color-mix(in srgb, var(--turn-glow, #ffc83c) 45%, transparent),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   padding: 10px;
   gap: 1px;
   flex-shrink: 0;
+  transition: box-shadow 0.6s ease;
 }
 
 .board__cell {
@@ -270,14 +275,10 @@ button {
   box-shadow: inset 0 0 10px -2px color-mix(in srgb, var(--blue) 70%, transparent);
 }
 
-.board__tokens {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  width: 100%;
-  height: 100%;
+.board__tokens-layer {
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
 }
 
 .base {
@@ -358,24 +359,44 @@ button {
   to { transform: rotate(360deg); }
 }
 
-.center-block .token {
+.center-block__flash {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 1;
+  inset: -20%;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: center-flash-capture 0.6s ease-out;
+}
+
+.center-block__flash--token-home {
+  animation-name: center-flash-home;
+}
+
+@keyframes center-flash-capture {
+  0% { box-shadow: 0 0 0 0 rgba(255, 90, 90, 0.75); opacity: 1; }
+  100% { box-shadow: 0 0 55px 35px rgba(255, 90, 90, 0); opacity: 0; }
+}
+
+@keyframes center-flash-home {
+  0% { box-shadow: 0 0 0 0 rgba(255, 235, 150, 0.85); opacity: 1; }
+  100% { box-shadow: 0 0 55px 35px rgba(255, 235, 150, 0); opacity: 0; }
 }
 
 /* ---------- Tokens ---------- */
 
 .token {
-  width: 66%;
+  position: absolute;
+  width: calc((min(88vw, 560px) - 20px) / 15 * 0.66);
   aspect-ratio: 1;
-  max-width: 22px;
+  max-width: 24px;
+  min-width: 12px;
   border-radius: 50%;
   border: none;
   cursor: default;
   padding: 0;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  pointer-events: auto;
+  z-index: 2;
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1), left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    translate 0.4s cubic-bezier(0.4, 0, 0.2, 1), scale 0.15s ease, box-shadow 0.15s ease;
   box-shadow:
     inset -2px -3px 4px rgba(0, 0, 0, 0.35),
     inset 2px 2px 3px rgba(255, 255, 255, 0.55),
@@ -406,12 +427,12 @@ button {
 }
 
 .token--movable:hover {
-  transform: scale(1.18);
+  scale: 1.18;
 }
 
 @keyframes token-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); }
+  0%, 100% { scale: 1; }
+  50% { scale: 1.12; }
 }
 
 /* ---------- Sidebar ---------- */

@@ -24,6 +24,7 @@ export function createInitialState(colors, mode = {}) {
     finishOrder: [],
     lastEvent: null,
     rollId: 0,
+    eventId: 0,
   };
 }
 
@@ -76,12 +77,15 @@ export function rollDice(state) {
     i === state.currentPlayerIndex ? { ...p, lastRoll: dice } : p
   );
 
+  const eventId = state.eventId + 1;
+
   if (consecutiveSixes === 3) {
     return advanceTurn({
       ...state,
       players,
       diceValue: dice,
       rollId,
+      eventId,
       lastEvent: { type: 'forfeit-triple-six', color: state.players[state.currentPlayerIndex].color },
     });
   }
@@ -96,6 +100,7 @@ export function rollDice(state) {
       diceValue: dice,
       consecutiveSixes,
       rollId,
+      eventId,
       lastEvent: { type: 'no-moves', color: player.color, dice },
     });
   }
@@ -106,6 +111,7 @@ export function rollDice(state) {
     diceValue: dice,
     consecutiveSixes,
     rollId,
+    eventId,
     diceRolled: true,
     movableTokens: movable,
     lastEvent: null,
@@ -171,6 +177,7 @@ export function moveToken(state, tokenIndex) {
     diceValue: null,
     movableTokens: [],
     lastEvent,
+    eventId: state.eventId + 1,
   };
 
   if (winner) return nextState;
