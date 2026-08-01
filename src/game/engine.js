@@ -13,6 +13,7 @@ export function createInitialState(colors, mode = {}) {
       color,
       tokens: Array(TOKENS_PER_PLAYER).fill(-1),
       isAI: !!mode.aiColors?.includes(color),
+      lastRoll: null,
     })),
     currentPlayerIndex: 0,
     diceValue: null,
@@ -71,10 +72,14 @@ export function rollDice(state) {
   const consecutiveSixes = dice === 6 ? state.consecutiveSixes + 1 : 0;
 
   const rollId = state.rollId + 1;
+  const players = state.players.map((p, i) =>
+    i === state.currentPlayerIndex ? { ...p, lastRoll: dice } : p
+  );
 
   if (consecutiveSixes === 3) {
     return advanceTurn({
       ...state,
+      players,
       diceValue: dice,
       rollId,
       lastEvent: { type: 'forfeit-triple-six', color: state.players[state.currentPlayerIndex].color },
@@ -87,6 +92,7 @@ export function rollDice(state) {
   if (movable.length === 0) {
     return advanceTurn({
       ...state,
+      players,
       diceValue: dice,
       consecutiveSixes,
       rollId,
@@ -96,6 +102,7 @@ export function rollDice(state) {
 
   return {
     ...state,
+    players,
     diceValue: dice,
     consecutiveSixes,
     rollId,
@@ -145,6 +152,16 @@ export function moveToken(state, tokenIndex) {
     if (!winner) winner = player.color;
   }
 
+  const extraTurn = dice === 6 || captured || finished;
+
+  const lastEvent = captured
+    ? { type: 'capture', color: player.color, victim: capturedColor, extraTurn }
+    : finished
+    ? { type: 'token-home', color: player.color, extraTurn }
+    : extraTurn
+    ? { type: 'six-again', color: player.color }
+    : null;
+
   const nextState = {
     ...state,
     players,
@@ -153,16 +170,11 @@ export function moveToken(state, tokenIndex) {
     diceRolled: false,
     diceValue: null,
     movableTokens: [],
-    lastEvent: captured
-      ? { type: 'capture', color: player.color, victim: capturedColor }
-      : finished
-      ? { type: 'token-home', color: player.color }
-      : null,
+    lastEvent,
   };
 
   if (winner) return nextState;
 
-  const extraTurn = dice === 6 || captured || finished;
   return extraTurn ? nextState : advanceTurn(nextState);
 }
 

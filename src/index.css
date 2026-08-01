@@ -283,7 +283,19 @@ button {
 .base {
   position: relative;
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.base__dice {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  transition: transform 0.2s ease;
+}
+
+.base__dice--current {
+  transform: scale(1.1);
 }
 
 .base--red { background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--red) 45%, transparent), transparent 72%), rgba(255, 255, 255, 0.04); box-shadow: inset 0 0 30px -8px color-mix(in srgb, var(--red) 70%, transparent); }
@@ -441,8 +453,6 @@ button {
 }
 
 .dice {
-  width: 68px;
-  height: 68px;
   border-radius: 18px;
   background: linear-gradient(155deg, #fffdf6, #e8e2d2 55%, #cfc7ae);
   border: none;
@@ -451,6 +461,19 @@ button {
   opacity: 0.5;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.85), inset 0 -3px 4px rgba(0, 0, 0, 0.18);
   transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.dice--md {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+}
+
+.dice--sm {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
 }
 
 .dice--active {
@@ -468,21 +491,31 @@ button {
   transform: scale(1.06) rotate(-3deg);
 }
 
+.dice--spinning {
+  animation: dice-shake 0.32s ease-in-out infinite;
+}
+
+@keyframes dice-shake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-12deg) scale(0.96); }
+  75% { transform: rotate(12deg) scale(0.96); }
+}
+
 .dice__face {
   position: absolute;
   inset: 0;
-  animation: dice-roll 0.35s ease-out;
+  animation: dice-roll 0.2s ease-out;
 }
 
 @keyframes dice-roll {
-  0% { transform: rotate(-30deg) scale(0.8); opacity: 0.4; }
-  100% { transform: rotate(0) scale(1); opacity: 1; }
+  0% { transform: scale(0.7); opacity: 0.3; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .dice__pip {
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: 15%;
+  height: 15%;
   border-radius: 50%;
   background: #2a2620;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 1px 1px rgba(0, 0, 0, 0.25);

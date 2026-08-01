@@ -7,15 +7,24 @@ const PIP_LAYOUTS = {
   6: [[25, 25], [25, 50], [25, 75], [75, 25], [75, 50], [75, 75]],
 };
 
-export default function Dice({ value, canRoll, onRoll, rollId, accentColor }) {
+export default function Dice({
+  value,
+  canRoll,
+  onRoll,
+  rollId,
+  accentColor,
+  size = 'md',
+  spinning = false,
+}) {
   const pips = PIP_LAYOUTS[value] || [];
   return (
     <button
       type="button"
-      className={`dice${canRoll ? ' dice--active' : ''}`}
+      className={`dice dice--${size}${canRoll ? ' dice--active' : ''}${spinning ? ' dice--spinning' : ''}`}
       style={accentColor ? { '--dice-accent': accentColor } : undefined}
       onClick={onRoll}
       disabled={!canRoll}
+      aria-label={value ? `dice showing ${value}` : 'dice'}
     >
       <span key={rollId} className="dice__face">
         {value

@@ -7,9 +7,13 @@ function eventMessage(event) {
   if (!event) return null;
   switch (event.type) {
     case 'capture':
-      return `${COLOR_LABEL[event.color]} captured a ${COLOR_LABEL[event.victim]} token!`;
+      return `💥 ${COLOR_LABEL[event.color]} captured a ${COLOR_LABEL[event.victim]} token! ${
+        event.extraTurn ? '+ extra turn!' : ''
+      }`;
     case 'token-home':
-      return `${COLOR_LABEL[event.color]} got a token home!`;
+      return `🏠 ${COLOR_LABEL[event.color]} got a token home! ${event.extraTurn ? '+ extra turn!' : ''}`;
+    case 'six-again':
+      return `🎲 ${COLOR_LABEL[event.color]} rolled a 6 — go again!`;
     case 'forfeit-triple-six':
       return `${COLOR_LABEL[event.color]} rolled three 6s in a row — turn forfeited.`;
     case 'no-moves':
@@ -19,9 +23,11 @@ function eventMessage(event) {
   }
 }
 
-export default function Sidebar({ gameState, onRoll, onRestart }) {
+export default function Sidebar({ gameState, onRoll, onRestart, rollAnim }) {
   const player = gameState.players[gameState.currentPlayerIndex];
   const message = eventMessage(gameState.lastEvent);
+  const animatingHere = rollAnim?.animating && rollAnim.playerIndex === gameState.currentPlayerIndex;
+  const diceValue = animatingHere ? rollAnim.face : gameState.diceValue;
 
   return (
     <aside className="sidebar">
@@ -40,13 +46,14 @@ export default function Sidebar({ gameState, onRoll, onRestart }) {
             {player.isAI ? `${COLOR_LABEL[player.color]} (Computer) is playing` : `${COLOR_LABEL[player.color]}'s turn`}
           </div>
           <Dice
-            value={gameState.diceValue}
+            value={diceValue}
             rollId={gameState.rollId}
             accentColor={COLOR_HEX[player.color]}
-            canRoll={!player.isAI && !gameState.diceRolled}
+            canRoll={!player.isAI && !gameState.diceRolled && !rollAnim?.animating}
+            spinning={animatingHere}
             onRoll={onRoll}
           />
-          {gameState.diceRolled && !player.isAI && (
+          {gameState.diceRolled && !player.isAI && !animatingHere && (
             <p className="turn-panel__hint">Tap a glowing token to move it.</p>
           )}
         </div>

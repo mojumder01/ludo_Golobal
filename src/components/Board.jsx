@@ -1,5 +1,6 @@
 import {
   COLORS,
+  COLOR_HEX,
   RING_PATH,
   HOME_COLUMNS,
   BASE_ORIGIN,
@@ -8,6 +9,7 @@ import {
   cellForProgress,
 } from '../game/constants';
 import Token from './Token';
+import Dice from './Dice';
 
 const ringCells = RING_PATH.map(([row, col], ringIndex) => ({
   row,
@@ -29,7 +31,7 @@ const STACK_NUDGE = [
   [6, 10],
 ];
 
-export default function Board({ gameState, onTokenClick }) {
+export default function Board({ gameState, onTokenClick, onRoll, rollAnim }) {
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
 
   const cellMap = new Map();
@@ -59,12 +61,30 @@ export default function Board({ gameState, onTokenClick }) {
       {COLORS.map((color) => {
         const [row, col] = BASE_ORIGIN[color];
         const player = gameState.players.find((p) => p.color === color);
+        const isCurrent = player && player.color === currentPlayer.color;
+        const animatingHere = isCurrent && rollAnim?.animating && rollAnim.playerIndex === gameState.currentPlayerIndex;
+        const diceValue = animatingHere ? rollAnim.face : isCurrent ? gameState.diceValue : player?.lastRoll;
+        const canRollHere =
+          isCurrent && !player.isAI && !gameState.diceRolled && !rollAnim?.animating && !gameState.winner;
         return (
           <div
             key={color}
             className={`base base--${color}`}
             style={{ gridRow: `${row + 1} / span 6`, gridColumn: `${col + 1} / span 6` }}
           >
+            {player && (
+              <div className={`base__dice${isCurrent ? ' base__dice--current' : ''}`}>
+                <Dice
+                  value={diceValue}
+                  rollId={gameState.rollId}
+                  size="sm"
+                  accentColor={COLOR_HEX[color]}
+                  canRoll={canRollHere}
+                  spinning={animatingHere}
+                  onRoll={onRoll}
+                />
+              </div>
+            )}
             <div className="base__panel">
               {[0, 1, 2, 3].map((tokenIndex) => {
                 const inBase = player && player.tokens[tokenIndex] === -1;
